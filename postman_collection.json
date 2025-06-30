@@ -1,0 +1,454 @@
+{
+	"info": {
+		"_postman_id": "12345678-1234-1234-1234-123456789012",
+		"name": "Solana API Server",
+		"description": "Complete API collection for testing Solana API Server endpoints including keypair generation, token operations, message signing, and transfers.",
+		"schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+		"_exporter_id": "12345678"
+	},
+	"item": [
+		{
+			"name": "Health Check",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has success field\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('success');",
+							"    pm.expect(jsonData.success).to.be.true;",
+							"});",
+							"",
+							"pm.test(\"Response has data field\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData).to.have.property('data');",
+							"    pm.expect(jsonData.data).to.have.property('status');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "GET",
+				"header": [],
+				"url": {
+					"raw": "{{baseUrl}}/health",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"health"
+					]
+				},
+				"description": "Check if the server is running and healthy"
+			},
+			"response": []
+		},
+		{
+			"name": "Generate Keypair",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has keypair data\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.be.true;",
+							"    pm.expect(jsonData.data).to.have.property('pubkey');",
+							"    pm.expect(jsonData.data).to.have.property('secret');",
+							"});",
+							"",
+							"pm.test(\"Save keypair for other tests\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.collectionVariables.set('pubkey', jsonData.data.pubkey);",
+							"    pm.collectionVariables.set('secret', jsonData.data.secret);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"url": {
+					"raw": "{{baseUrl}}/keypair",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"keypair"
+					]
+				},
+				"description": "Generate a new Solana keypair"
+			},
+			"response": []
+		},
+		{
+			"name": "Sign Message",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has signature data\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.be.true;",
+							"    pm.expect(jsonData.data).to.have.property('signature');",
+							"    pm.expect(jsonData.data).to.have.property('public_key');",
+							"    pm.expect(jsonData.data).to.have.property('message');",
+							"});",
+							"",
+							"pm.test(\"Save signature for verification\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.collectionVariables.set('signature', jsonData.data.signature);",
+							"    pm.collectionVariables.set('message', jsonData.data.message);",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"message\": \"Hello, Solana! This is a test message.\",\n  \"secret\": \"{{secret}}\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/message/sign",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"message",
+						"sign"
+					]
+				},
+				"description": "Sign a message using Ed25519 cryptography"
+			},
+			"response": []
+		},
+		{
+			"name": "Verify Message",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Message verification successful\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.be.true;",
+							"    pm.expect(jsonData.data).to.have.property('valid');",
+							"    pm.expect(jsonData.data.valid).to.be.true;",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"message\": \"{{message}}\",\n  \"signature\": \"{{signature}}\",\n  \"pubkey\": \"{{pubkey}}\"\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/message/verify",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"message",
+						"verify"
+					]
+				},
+				"description": "Verify a signed message"
+			},
+			"response": []
+		},
+		{
+			"name": "Create Token Mint",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has instruction data\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.be.true;",
+							"    pm.expect(jsonData.data).to.have.property('program_id');",
+							"    pm.expect(jsonData.data).to.have.property('accounts');",
+							"    pm.expect(jsonData.data).to.have.property('instruction_data');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"mintAuthority\": \"{{pubkey}}\",\n  \"mint\": \"{{pubkey}}\",\n  \"decimals\": 6\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/token/create",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"token",
+						"create"
+					]
+				},
+				"description": "Create a new SPL token mint instruction"
+			},
+			"response": []
+		},
+		{
+			"name": "Mint Tokens",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has instruction data\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.be.true;",
+							"    pm.expect(jsonData.data).to.have.property('program_id');",
+							"    pm.expect(jsonData.data).to.have.property('accounts');",
+							"    pm.expect(jsonData.data).to.have.property('instruction_data');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"mint\": \"{{pubkey}}\",\n  \"destination\": \"{{pubkey}}\",\n  \"authority\": \"{{pubkey}}\",\n  \"amount\": 1000000\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/token/mint",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"token",
+						"mint"
+					]
+				},
+				"description": "Create a mint-to instruction for SPL tokens"
+			},
+			"response": []
+		},
+		{
+			"name": "Create SOL Transfer",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has SOL transfer instruction\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.be.true;",
+							"    pm.expect(jsonData.data).to.have.property('program_id');",
+							"    pm.expect(jsonData.data).to.have.property('accounts');",
+							"    pm.expect(jsonData.data).to.have.property('instruction_data');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"from\": \"{{pubkey}}\",\n  \"to\": \"11111111111111111111111111111112\",\n  \"lamports\": 1000000\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/sol/transfer",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"sol",
+						"transfer"
+					]
+				},
+				"description": "Create a SOL transfer instruction"
+			},
+			"response": []
+		},
+		{
+			"name": "Create Token Transfer",
+			"event": [
+				{
+					"listen": "test",
+					"script": {
+						"exec": [
+							"pm.test(\"Status code is 200\", function () {",
+							"    pm.response.to.have.status(200);",
+							"});",
+							"",
+							"pm.test(\"Response has token transfer instruction\", function () {",
+							"    var jsonData = pm.response.json();",
+							"    pm.expect(jsonData.success).to.be.true;",
+							"    pm.expect(jsonData.data).to.have.property('program_id');",
+							"    pm.expect(jsonData.data).to.have.property('accounts');",
+							"    pm.expect(jsonData.data).to.have.property('instruction_data');",
+							"});"
+						],
+						"type": "text/javascript"
+					}
+				}
+			],
+			"request": {
+				"method": "POST",
+				"header": [
+					{
+						"key": "Content-Type",
+						"value": "application/json"
+					}
+				],
+				"body": {
+					"mode": "raw",
+					"raw": "{\n  \"mint\": \"{{pubkey}}\",\n  \"owner\": \"{{pubkey}}\",\n  \"destination\": \"11111111111111111111111111111112\",\n  \"amount\": 100000\n}"
+				},
+				"url": {
+					"raw": "{{baseUrl}}/token/transfer",
+					"host": [
+						"{{baseUrl}}"
+					],
+					"path": [
+						"token",
+						"transfer"
+					]
+				},
+				"description": "Create an SPL token transfer instruction"
+			},
+			"response": []
+		}
+	],
+	"event": [
+		{
+			"listen": "prerequest",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		},
+		{
+			"listen": "test",
+			"script": {
+				"type": "text/javascript",
+				"exec": [
+					""
+				]
+			}
+		}
+	],
+	"variable": [
+		{
+			"key": "baseUrl",
+			"value": "http://localhost:3000",
+			"type": "string",
+			"description": "Base URL for the Solana API Server"
+		},
+		{
+			"key": "pubkey",
+			"value": "",
+			"type": "string",
+			"description": "Generated public key for testing"
+		},
+		{
+			"key": "secret",
+			"value": "",
+			"type": "string",
+			"description": "Generated secret key for testing"
+		},
+		{
+			"key": "signature",
+			"value": "",
+			"type": "string",
+			"description": "Generated signature for verification testing"
+		},
+		{
+			"key": "message",
+			"value": "",
+			"type": "string",
+			"description": "Message used for signing and verification"
+		}
+	]
+}
